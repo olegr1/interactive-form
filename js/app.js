@@ -1,4 +1,9 @@
 {
+    let form;
+    let basicInfoFieldset;
+    let nameField;
+    let emailField;
+
     let jobRoleField;
     let otherJobRoleField;
 
@@ -11,23 +16,78 @@
     let activityCheckboxes;
     let activityPriceAmount;
 
+    let paymentFieldset;
+    let paymentSelect;
+    let paymentCreditCardSection;
+    let paymentPaypalSection;
+    let paymentNotSelectedMessage;
+    let paymentBitcoinSection;
+    let creaditCardNumberField;
+    let zipField;
+    let cvvField;
+
+    let submitButton;
+
+    let validElements = {
+        name: false,
+        email: false,
+        activities: false,
+        paymentMethod: false,
+        paymentCardNumber: false,
+        paymentZip: false,
+        paymentCvv: false
+    }
+
     //Initial setup to run on DOM load
     function init(){
+        //Cache DOM element references
+        form = document.querySelector("form");
+        basicInfoFieldset = form.querySelector("form > fieldset");
+        nameField = document.querySelector("#name");
+        emailField = document.querySelector("#mail");
+        jobRoleSelect = document.querySelector("#title");
+
+        tShirtDesignSelect = document.querySelector("#design");
+        tShirtColorSelectContainer = document.querySelector("#colors-js-puns");
+        tShirtColorSelect = tShirtColorSelectContainer.querySelector("#color"); 
+
+        activitiesFieldset = document.querySelector(".activities");
+        activityCheckboxes =  activitiesFieldset.querySelectorAll("label > input");
+
+        paymentFieldset =  document.querySelectorAll("form > fieldset")[3];
+        paymentSelect = document.querySelector("#payment");
+        paymentCreditCardSection = document.querySelector("#credit-card");
+        paymentPaypalSection = paymentCreditCardSection.nextElementSibling;
+        paymentBitcoinSection = paymentPaypalSection.nextElementSibling; 
+
+        paymentNotSelectedMessage = document.createElement("DIV");
+        paymentNotSelectedMessage.innerHTML = '<span style="color: red; font-size: 15px; margin-bottom: 5px; margin-top: 5px;">' +
+                                              'Please select a payment method!' +
+                                              '</span>';    
+        paymentFieldset.appendChild(paymentNotSelectedMessage);
+
+
 
         //Focus the firt text field on load
         document.querySelector('input[type="text"]').focus();
 
+        addBasicInfoFunctionality();
         addJobRoleFunctionality();        
         addTshirtFunctionality();
         addActivitiesFunctionality();
+        addPaymentFunctionality();
+
+        addValidation();
+
+        form.addEventListener("submit", submitHandler);
     };
+
+    function addBasicInfoFunctionality(){
+
+    }
 
     //Job Role logic
     function addJobRoleFunctionality(){
-
-        //Cache relevant DOM elements
-        jobRoleSelect = document.querySelector("#title");
-
         /* Hide the Other job role field by default */
         otherJobRoleField = document.querySelector("#other-title");
         otherJobRoleField.style.display = "none";        
@@ -46,10 +106,6 @@
     
     //T-shirt logic
     function addTshirtFunctionality(){
-        //Cache relevant DOM elements
-        tShirtDesignSelect = document.querySelector("#design");
-        tShirtColorSelectContainer = document.querySelector("#colors-js-puns");
-        tShirtColorSelect = tShirtColorSelectContainer.querySelector("#color");  
 
         //Create an array of all options in the Color dropdown
         for(let i = 0; i < tShirtColorSelect.childElementCount; i++){
@@ -87,9 +143,6 @@
 
     //Activities logic
     function addActivitiesFunctionality(){
-        //Cache relevant DOM elements
-        activitiesFieldset = document.querySelector(".activities");
-        activityCheckboxes =  activitiesFieldset.querySelectorAll("label > input");
 
         //Create an element to show total activity price
         const activityPriceContainer = document.createElement("DIV");
@@ -142,7 +195,7 @@
                     if(clickedCheckbox.dataset.day === activityCheckboxes[i].dataset.day && 
                         clickedCheckbox.dataset.time === activityCheckboxes[i].dataset.time
                     ){
-                        //Depending on wheter the clicked checkbox was checked or unchecked, diable or re-enable conflicting activities
+                        //Depending on wheter the clicked checkbox became checked or unchecked, disable or re-enable conflicting activities
                         if(clickedCheckbox.checked){
                             activityCheckboxes[i].disabled = true;
                             activityCheckboxes[i].parentElement.style.opacity = .4;
@@ -163,6 +216,101 @@
             activityPriceAmount.innerHTML = totalPrice;
         }
     }
+
+    //Payment method selection logic
+    function addPaymentFunctionality(){
+
+        //Set the initial state
+        paymentPaypalSection.style.display = "none";
+        paymentBitcoinSection.style.display = "none";
+        paymentSelect.value = "credit card";
+
+        //Hanle payment method selection
+        paymentSelect.addEventListener("change", handlePaymentMethodSelection);
+    }
+
+    function handlePaymentMethodSelection(event){
+
+        //Hide/show appropriate payment info based on selection
+        if(paymentSelect.value === "credit card"){
+
+            paymentCreditCardSection.style.display = "block";
+            paymentPaypalSection.style.display = "none";
+            paymentBitcoinSection.style.display = "none";
+
+        }else if(paymentSelect.value === "paypal"){
+
+            paymentCreditCardSection.style.display = "none";
+            paymentPaypalSection.style.display = "block";
+            paymentBitcoinSection.style.display = "none";
+
+        }else if(paymentSelect.value === "bitcoin"){
+
+            paymentCreditCardSection.style.display = "none";
+            paymentPaypalSection.style.display = "none";
+            paymentBitcoinSection.style.display = "block";     
+            
+        }else{
+
+            paymentCreditCardSection.style.display = "none";
+            paymentPaypalSection.style.display = "none";
+            paymentBitcoinSection.style.display = "none";     
+        }
+    }
+
+    function addValidation(){
+        const nameFieldErrorElement = document.createElement("DIV");
+        nameFieldErrorElement.style.color = "red";
+        nameFieldErrorElement.style.fontSize = "15px";
+        nameFieldErrorElement.style.marginBottom = "15px";
+        nameFieldErrorElement.style.marginTop = "-10px";
+        basicInfoFieldset.insertBefore(nameFieldErrorElement, emailField.previousElementSibling);
+
+        nameFieldErrorElement.innerText ="Name empty";
+
+        const emailFieldErrorElement = nameFieldErrorElement.cloneNode(false);
+        basicInfoFieldset.insertBefore(emailFieldErrorElement, jobRoleSelect.previousElementSibling);
+
+        emailFieldErrorElement.innerText ="Email empty";
+
+        const activityErrorElement = nameFieldErrorElement.cloneNode(false);
+        activityErrorElement.textContent = "Please select at least one activity"
+        activityErrorElement.style.marginBottom = "5px";
+        activityErrorElement.style.marginTop = "10px";
+        activitiesFieldset.appendChild(activityErrorElement);
+        
+    }
+
+    function checkValidation(){
+        for(let prop in validElements){
+
+            submitButton = document.querySelector("button[type='submit']");
+            submitButton.disabled = true;
+            submitButton.style.opacity = .5;
+            submitButton.style.cursor = "default";
+
+            if(validElements[prop] === false){
+                break;
+            }
+
+            submitButton.disabled = false;
+            submitButton.style.opacity = 1;
+            submitButton.style.cursor = "pointer";
+        }
+    }
+
+    function submitHandler(event){
+
+         for(let prop in validElements){
+
+            console.log(prop + " : " + validElements[prop]); 
+
+            if(validElements[prop] === false){
+                event.preventDefault();                               
+            }
+        }
+    }
+    
 
 
     //Run the initial setup when the DOM is ready
