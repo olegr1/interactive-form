@@ -113,6 +113,12 @@ button:hover {
 	background: #184c62;
 }
 
+.error{
+	color: #ff0000;
+	font-size: 15px;
+	margin-bottom: 10px;
+}
+
 /* ================================= 
   Page Styles
 ==================================== */
