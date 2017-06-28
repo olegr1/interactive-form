@@ -1,5 +1,5 @@
+//Block-scope the code to avoid polluting the global scope
 {
-    //Define variables accessible to all functions
     let form;
     let submitButton;
 
@@ -196,7 +196,7 @@
         }
 
         if(selectedActivitiesCount < 1){
-            activitiesErrorMessageContainer.innerHTML = "please select one or more activities";
+            activitiesErrorMessageContainer.innerHTML = "• please select one or more activities";
             isValid = false;
         }        
 
@@ -289,6 +289,8 @@
 
         paymentSelectErrorMessageContainer = document.createElement("DIV");
         paymentSelectErrorMessageContainer.className = "error";
+        paymentSelectErrorMessageContainer.innerText = "• please select payment method";
+        paymentSelectErrorMessageContainer.style.display = "none";
         paymentFieldset.insertBefore(paymentSelectErrorMessageContainer, creditCardNumberErrorMessageContainer);
 
         //Trigger validation on keyup event to provide real-time validation feedback
@@ -311,7 +313,10 @@
         let isValid = true;
 
         if(paymentSelect.value === "select_method"){
+            paymentSelectErrorMessageContainer.style.display = "block";
             isValid = false;
+        }else{
+            paymentSelectErrorMessageContainer.style.display = "none";
         }      
 
         return isValid;
@@ -331,6 +336,7 @@
             creditCardNumberErrorMessageContainer.style.display = "block";
             zipErrorMessageContainer.style.display = "block";
             cvvErrorMessageContainer.style.display = "block";  
+            paymentSelectErrorMessageContainer.style.display = "none";
 
         }else if(paymentSelect.value === "paypal"){
 
@@ -341,6 +347,7 @@
             creditCardNumberErrorMessageContainer.style.display = "none";
             zipErrorMessageContainer.style.display = "none";
             cvvErrorMessageContainer.style.display = "none";  
+            paymentSelectErrorMessageContainer.style.display = "none";
 
         }else if(paymentSelect.value === "bitcoin"){
 
@@ -350,7 +357,8 @@
 
             creditCardNumberErrorMessageContainer.style.display = "none";
             zipErrorMessageContainer.style.display = "none";
-            cvvErrorMessageContainer.style.display = "none";  
+            cvvErrorMessageContainer.style.display = "none";
+            paymentSelectErrorMessageContainer.style.display = "none";
             
         }else{
 
@@ -361,6 +369,7 @@
             creditCardNumberErrorMessageContainer.style.display = "none";
             zipErrorMessageContainer.style.display = "none";
             cvvErrorMessageContainer.style.display = "none";   
+            paymentSelectErrorMessageContainer.style.display = "block";
         }
     }
 
@@ -369,8 +378,8 @@
 
         //The functions return true or false depending on the validation status
         let validationChecklist = [
-            validateTextField(nameField, "Name", ["non-empty"], nameErrorMessageContainer),
-            validateTextField(emailField, "Email", ["non-empty", "email-format"], emailErrorMessageContainer),
+            validateTextField(nameField, "name", ["non-empty"], nameErrorMessageContainer),
+            validateTextField(emailField, "email", ["non-empty", "email-format"], emailErrorMessageContainer),
             validateActivities(),
             validatePayment()
         ];
@@ -380,16 +389,14 @@
             validationChecklist = validationChecklist.concat([
                 validateTextField(cvvField, "CVV", ["non-empty", "cvv"], cvvErrorMessageContainer),
                 validateTextField(zipField, "ZIP", ["non-empty", "zip"], zipErrorMessageContainer),
-                validateTextField(creditCardNumberField, "Credit card number", ["non-empty", "credit-card"], creditCardNumberErrorMessageContainer)
+                validateTextField(creditCardNumberField, "credit card number", ["non-empty", "credit-card"], creditCardNumberErrorMessageContainer)
             ]);
         }   
 
         //Check if all the relevant fields are validated, otherwise prevent the form from submitting
-        
-        for(let i = 0; i < validationChecklist.length; i++){
-            if(validationChecklist[i] === false){
-                event.preventDefault();                                              
-            }            
+        if(validationChecklist.indexOf(false) > -1){
+            event.preventDefault();
+            alert("Cannot submit, the form has errors!");
         }
     }
 
